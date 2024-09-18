@@ -1,9 +1,43 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
 <h1>{{ name_aplication }}</h1>
 
 
 <h5>Name: </h5>
 <p>{{ name }}</p>
-<!-- <h5>NPM: </h5>
-<p>{{ npm }} </p> Ubah sesuai dengan npm kamu -->
 <h5>Class: </h5>
 <p>{{ class }}</p> <!-- Ubah sesuai dengan kelas kamu -->
+
+
+{% if not list_product %}
+<p>Belum ada data Product pada {{ name_aplication }}.</p>
+{% else %}
+<table>
+  <tr>
+    <th>Nama Product</th>
+    <th>Price</th>
+    <th>Description</th>
+  </tr>
+
+  {% comment %} Berikut cara memperlihatkan data Product di bawah baris ini 
+  {% endcomment %} 
+  {% for product in list_product %}
+  <tr>
+    <td>{{product.name}}</td>
+    <td>{{product.price}}</td>
+    <td>{{product.description}}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<br />
+
+<a href="{% url 'main:create_product' %}">
+  <button>Add New Product</button>
+</a>
+
+
+{% endblock content %}

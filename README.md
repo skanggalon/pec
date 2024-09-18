@@ -69,3 +69,99 @@ Menurut saya, Django dapat menjadi pintu masuk utama yang relatif lebih mudah di
 ## Mengapa model pada Django disebut sebagai ORM?
 
 Model pada Django disebut sebagai ORM karena Django pakai Object-Relational Mapping buat ngehubungin antara model yang kita bikin di Python sama tabel di database. Jadi, kita bisa ngatur data di database cukup dengan kode Python aja tanpa perlu repot-repot nulis SQL manual. Dengan ORM ini, semuanya jadi lebih gampang dan enak dimengerti, terutama jika kita yang pingin fokus ke logika aplikasi tanpa pusing mikirin detail interaksi dengan database.
+
+# TUGAS 3
+
+## Implementasi Tugas 3
+
+### Menyiapkan Kerangka HTML
+1. Melakukan penambahan base.html pada direktori baru, yaitu templates pada root folder dan mendaftarkannya pada  Templates settings.
+2. Mengubah primary key menjadi uuid pada class model agar id unik dan aman. Lalu, mengmigrasikannya.
+
+### Membuat input form untuk menambahkan objek model pada app sebelumnya + Routing
+3. Membuat file baru, forms.py, pada aplikasi atau direktori main. Lalu, mengassign model yang akan digunakan yaitu product dan field yang akan diisi pada form.
+
+```
+from django.forms import ModelForm
+from main.models import Product
+
+class ProductForm(ModelForm):
+    class Meta:
+        model = Product
+        fields = ["name", "price", "description"]
+```
+
+4. Pada file views.py, menambahkan fungsi baru yaitu create_product dengan isi menampilkan halaman form input data yang mana jika berhasil akan kembali ke menu utama.
+
+5. Lalu, pada fungsi show_main pada views.py, ambil seluruh database dalam product dan menggsingnya kedalam dictionary context untuk di render.
+
+6. Menambahkan pada direktori main/templates, create_product.html, dengan mengextend base.html isi pada halaman tersebut adalah menampilkan input form database. Lalu, menambahkan code untuk menampilkan product pada main.html.
+
+7. Melakukan routing pada main/urls.py agar create_product.html dapat terakses.
+
+###  Tambahkan 4 fungsi views baru untuk melihat objek yang sudah ditambahkan dalam format XML, JSON, XML by ID, dan JSON by ID.
+8.  Menambahkan fungsi pada views.py untuk dapat melihat format XML, JSON, XML by ID, dan JSON by ID
+
+```
+def show_xml(request):
+    data = Product.objects.all()
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+def show_json(request):
+    data = Product.objects.all()
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+def show_xml_by_id(request, id):
+    data = Product.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("xml", data), content_type="application/xml")
+
+def show_json_by_id(request, id):
+    data = Product.objects.filter(pk=id)
+    return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+```
+
+Pada show xml dan json, sebelum mereturn hasil data dalam bentuk xml/json, kita perlu mengambil seluruh data pada product baru menambahkannya pada parameter serialize agar diconvert kedalam bentuk xml/json. Hal ini berbeda pada by id dimana kita mengambil data hanya dengan id yang kita inginkan.
+
+9. Melakukan routing pada main/urls.py agar kita dapat menampilkan halaman-halaman tersebut
+
+```
+urlpatterns = [
+    path('', show_main, name='show_main'),
+    path('create-product', create_product, name='create_product'),
+    path('xml/', show_xml, name='show_xml'),
+    path('json/', show_json, name='show_json'),
+    path('xml/<str:id>/', show_xml_by_id, name='show_xml_by_id'),
+    path('json/<str:id>/', show_json_by_id, name='show_json_by_id'),
+]
+```
+Diatas adalah bentuk akhir routing pada Tugas 3 kali ini.
+
+## Jelaskan mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
+
+Sebuah platform itu membutuhkan suatu cara untuk mengirimkan data antara server dan client. Nah sehingga dengan data delivery inilah yang memungkinkan server mengirim data ke client atau sebaliknya untuk ditampilkan/diolah. Tanpa data delivery, suatu platform akan kesulitan dalam menyamakan data ( jika terdapat perubahan atau penambahan/pengurangan ) sehingga nantinya tidak akan bisa mengupdate informasi/data secara real-time dan dapat menimbulkan kebingungan dalam segi database. Oleh karena itu, kita memerulkan data delivery dalam mengimplementasikan sebuah platform.
+
+## Menurutmu, mana yang lebih baik antara XML dan JSON? Mengapa JSON lebih populer dibandingkan XML?
+
+Menurut saya pribadi, JSON lebih baik dari pada XML karena dari sintaksnya aja lebih mudah dibaca dibanding XML dan juga self describing. Dengan format dictionary,  value yang ada pada data JSON ini kita bisa mengambilnya dengan relatif lebih mudah, contohnya kita bisa memanggil keynya dalam bahasa python. Selain itu, pada umumnya juga JSON lebih sering digunakan dalam pengembahan di berbagai aplikasi.
+
+## Jelaskan fungsi dari method is_valid() pada form Django dan mengapa kita membutuhkan method tersebut?
+
+Method is_valid() ini digunakan untuk memvalidasi data yang diinput oleh user, dengan method ini kita dapat memastikan bahwa data yang diinput telah sesuai, misal field sudah terisi semua, tipe data yang sesuai, dan batas panjang yang sesuai. Jika valid, method ini mengembalikan nilai True dan data dapat disimpan atau diproses. Validasi ini tentunya sangatlah penting agar data yang diterima sesuai dengan apa yang kita harapkan dan tentunya dapat mencegah kesalahan atau bahkan keamanan suatu aplikasi, terutama bagian datanya.
+
+## Mengapa kita membutuhkan csrf_token saat membuat form di Django? Apa yang dapat terjadi jika kita tidak menambahkan csrf_token pada form Django? Bagaimana hal tersebut dapat dimanfaatkan oleh penyerang?
+
+Kita membutuhkan csrf_token untuk melindungi aplikasi dari serangan Cross-Site Request Forgery ( CSRF ), di mana penyerang bisa menyamar sebagai user yang valid, lalu mengirimkan sebuah request "sah" yang berbahaya tanpa sepengatahuan user. Request ini bisa dimanfaatkan oleh penyerang untuk mengobrak-abrik data pengguna, bahkan dapat merugikan pengguna secara langsung jika terkait dengan form transaksi.
+
+## hasil akses URL pada Postman
+
+### Show XML
+![showxml](img/show_xml.png)
+
+### Show XML by Id
+![showxmlbyid](img/show_xml_by_id.png)
+
+### Show JSON
+![showjson](img/show_json.png)
+
+### Show JSON by Id
+![showjsonbyid](img/show_json_by_id.png)
