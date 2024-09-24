@@ -424,4 +424,7 @@ def show_main(request):
 
 Dengan melakukan step diatas, kita berhasil menghubungkan model Product dengan User.
 
+## 2 Akun dengan 3 product dummy
+![akun1](img/akun1.png)
+![akun2](img/akun2.png)
 
