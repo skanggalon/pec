@@ -11,6 +11,7 @@ Link : http://muhammad-zaid31-pec.pbp.cs.ui.ac.id/
 - [TUGAS 2](#tugas-2)
 - [TUGAS 3](#tugas-3)
 - [TUGAS 4](#tugas-4)
+- [TUGAS 5](#tugas-5)
 
 # TUGAS 2
 
@@ -61,7 +62,7 @@ Setelah melakukan hal tersebut, taraa~~ jadi deh proyeknya
 
 ![mindmap](img/mindmap.png)
 
-Request user akan diteruskan kepada framework Django dimana disana request akan dipetakan melalui urls.py untuk diarahkan kepada views.py yang diinginkan. Setelah diterima oleh views.py, request tersebut akan diproses dengan mengambil/menulis data pada models.py karena hal tersebut merupakan bagian dari database. Lalu, setelah mengambil/menulis data, maka views kembali memproses templates yang berisi html untuk menampilkan display yang diinginkan. Setelah semua data tersebut didapatkan, maka semua  hasil tersebut akan diteruskan dan ditampilkan pada user.
+Request user akan diteruskan kepada framework Django di mana disana request akan dipetakan melalui urls.py untuk diarahkan kepada views.py yang diinginkan. Setelah diterima oleh views.py, request tersebut akan diproses dengan mengambil/menulis data pada models.py karena hal tersebut merupakan bagian dari database. Lalu, setelah mengambil/menulis data, maka views kembali memproses templates yang berisi html untuk menampilkan display yang diinginkan. Setelah semua data tersebut didapatkan, maka semua  hasil tersebut akan diteruskan dan ditampilkan pada user.
 
 
 ## Jelaskan fungsi git dalam pengembangan perangkat lunak!
@@ -126,7 +127,7 @@ def show_json_by_id(request, id):
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
 ```
 
-Pada show xml dan json, sebelum mereturn hasil data dalam bentuk xml/json, kita perlu mengambil seluruh data pada product baru menambahkannya pada parameter serialize agar diconvert kedalam bentuk xml/json. Hal ini berbeda pada by id dimana kita mengambil data hanya dengan id yang kita inginkan.
+Pada show xml dan json, sebelum mereturn hasil data dalam bentuk xml/json, kita perlu mengambil seluruh data pada product baru menambahkannya pada parameter serialize agar diconvert kedalam bentuk xml/json. Hal ini berbeda pada by id di mana kita mengambil data hanya dengan id yang kita inginkan.
 
 9. Melakukan routing pada main/urls.py agar kita dapat menampilkan halaman-halaman tersebut
 
@@ -194,7 +195,7 @@ Dengan melakukan penambahan,
 ```python
  user = models.ForeignKey(User, on_delete=models.CASCADE)
  ```
-pada model kita, dalam konteks hal ini adalah Product(). Kita menghubungkan model Product dengan satu user, dimana ForeignKey digunakan untuk membuat relasi, yang mana satu user dapat memiliki banyak Product.
+pada model kita, dalam konteks hal ini adalah Product(). Kita menghubungkan model Product dengan satu user, di mana ForeignKey digunakan untuk membuat relasi, yang mana satu user dapat memiliki banyak Product.
 
 Lalu, dengan penambahan pada fungsi create_product, kita dapat menyimpan suatu Product pada user yang sedang melakukan login.
 Disni penambahannya adalah, 
@@ -427,4 +428,200 @@ Dengan melakukan step diatas, kita berhasil menghubungkan model Product dengan U
 ## 2 Akun dengan 3 product dummy
 ![akun1](img/akun1.png)
 ![akun2](img/akun2.png)
+
+
+# TUGAS 5
+
+## Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut!
+
+Jika terdapat beberapa CSS selector pada elemen HTML, maka browser kita akan menentukannya berdasarkan tingkat specifity ("spesifik" atau seberapa "kuat" sebuah selector dalam menerapkan gaya pada elemen HTML). Urutan pertama adalah Inline style, di mana menggunakan antribut style pada HTMLnya. 
+```html
+<div style="color: red;">Contoh Inline Style</div>
+```
+
+Lalu, yang kedua adalah ID selector, di mana kita menambahkannya pada tag HTMLnya
+```html
+<body>
+  <div id="header">
+    <h1>Bermain bersama ID header</h1>
+  </div>
+  ...
+</body>
+```
+
+```css
+#header {
+  background-color: #a3b90e;
+  margin-top: 0;
+  padding: 20px 20px 20px 40px;
+}
+```
+
+Dan yang ketiga adalah Class, pseudo-class, dan attribute selector. hal ini mirip ID selector, kita dapat menambahkan tag class pada HTML dan memilihnya pada file css kita.
+```css
+.content_section {
+  background-color: #112a33;
+  margin-bottom: 30px;
+  color: #0F0F0F;
+  font-family: cursive;
+  padding: 20px 20px 20px 40px;
+}
+```
+
+Yang keempat adalah Type selector (tag selector) dan pseudo-elements (seperti ::before dan ::after). Di mana kita memilih secara spesifik style pada tag HTML.
+```css
+p {
+  color: black;
+}
+```
+Dan yang terakhir adalah Universal selector (*). Di mana selector ini memiliki tingkatan paling rendah karena selector ini menerapkan CSS pada semua elemen dalam halaman web kita.
+```css
+* {
+  margin: 0;
+  padding: 0;
+}
+```
+
+## Mengapa responsive design menjadi konsep yang penting dalam pengembangan aplikasi web? Berikan contoh aplikasi yang sudah dan belum menerapkan responsive design!
+
+Responsive design sangatlah penting karena kita harus melihat dari sudut pandang user. Di mana user tidak semuanya akan mengakses aplikasi web kita dengan 1 device saja, semisal komputer/laptop saja. Ada kemungkinan di mana user mengakses aplikasi web kita pada mobile phonesnya mereka. Jika kita tidak menerapkan responsive design, tentunya akan sangat menyulitkan user dan mengurangi experiencenya dalam menggunakan aplikasi web kita. Oleh karena itu, kita perlu memastikan dalam pengembangan aplikasi web bahwa tampilan dan fungsionalitasnya dapat beradaptasi dengan berbagai ukuran layar dan perangkat sehingga experience user akan maksimal.
+
+Contoh aplikasi yang sudah menerapkan responsive design, Facebook, Scele, Netflix, dan masih banyak lagi. Sedangkan yang belum menerapkan responsive design, Tokopedia (tidak bisa menyesuaikan pada desktop saya), kaskus, dan website jadul.
+
+## Jelaskan perbedaan antara margin, border, dan padding, serta cara untuk mengimplementasikan ketiga hal tersebut!
+![boxmodel](img/boxmodel.png)
+
+Margin adalah area kosong di luar elemen yang memisahkannya dari elemen lain. Sedangkan, border adalah garis di sekitar elemen yang terletak antara margin dan padding, di mana ia membungkus padding dan contentnya. Lalu, padding adalah ruang di dalam elemen, antara konten elemen (seperti teks) dan border. Di mana ketiganya digunakan bersama untuk menentukan jarak dan struktur elemen pada halaman web, di mana margin mengatur ruang luar, padding mengatur ruang dalam, dan border membatasi elemen.
+
+```css
+    .contoh_box {
+      margin: 20px;
+      padding: 10px;
+      border: 2px solid blue;
+    }
+```
+
+##  Jelaskan konsep flex box dan grid layout beserta kegunaannya!
+
+Flexbox dan Grid Layout merupakan dua konsep dalam CSS yang sangat berguna untuk mengatur tata letak elemen di halaman web kita. Flexbox digunakan untuk mengatur elemen dalam satu baris atau kolom secara fleksibel sehingga elemen-elemen tersebut bisa menyesuaikan ukuran dan posisi sesuai dengan layar yang digunakan oleh user nantinya. Nah, hal ini cocok ketika kita ingin mengatur tata letak yang lebih sederhana, seperti menyusun menu atau galeri gambar. Sedangkan, Grid Layout lebih cocok untuk tata letak yang lebih kompleks karena memungkinkan kita untuk mengatur elemen dalam beberapa baris dan kolom sekaligus. Dengan Grid, kita bisa membuat layout halaman web seperti header, sidebar, dan konten utama dengan lebih terstruktur. Keduanya sangat membantu dalam membuat aplikasi web yang responsif sehingga tampilan tetap rapi di berbagai ukuran layar user nantinya.
+
+## Implementasi Tugas 5
+
+1. Menambahkan logic edit_product pada views.py sehingga hal ini nantinya akan berfungsi untuk merender halaman edit product.
+```python
+def edit_product(request, id):
+    # Get product entry berdasarkan id
+    product = Product.objects.get(pk = id)
+
+    # Set product entry sebagai instance dari form
+    form = ProductForm(request.POST or None, instance=product)
+
+    if form.is_valid() and request.method == "POST":
+        # Simpan form dan kembali ke halaman awal
+        form.save()
+        return HttpResponseRedirect(reverse('main:show_main'))
+
+    context = {'form': form}
+    return render(request, "edit_product.html", context)
+```
+Notes: Perlu mengimport reverse dan HttpResponseRedirect terlebih dahulu
+
+Setelah menambahkan fungsi tersebut, saya membuat edit_product.html untuk halamannya dan menyambungkannya pada urls.py
+```python
+path('edit-product/<uuid:id>', edit_product, name='edit_product'),
+```
+
+2. Menambahkan logic delete_product pada views.py, yang mana hal ini akan berfungsi untuk mendelete product.
+```python
+def delete_product(request, id):
+    # Get product berdasarkan id
+    product = Product.objects.get(pk = id)
+    # Hapus mood
+    product.delete()
+    # Kembali ke halaman awal
+    return HttpResponseRedirect(reverse('main:show_main'))
+```
+
+Setelah itu. melakukan routing pada ulrs.py dan terakhir menambahkan button untuk edit dan delete pada halaman yang diinginkan, dalam proyek ini di dalam main.html.
+```python
+path('delete/<uuid:id>', delete_product, name='delete_product'),
+```
+
+3. Pada proyek ini saya menggunakan Tailwind sehingga perlu menambahkan tailwind terlebih dahulu pada base.html.
+```html
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% block meta %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% endblock meta %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/global.css' %}"/>
+  </head>
+
+  <body>
+    {% block content %} {% endblock content %}
+  </body>
+</html>
+```
+
+Pada base.html tersebut saya juga menambahkan static/css/global.css dimana sebelum hal tersebut saya mengkonfigurasi static filesnya terlebih dahulu pada settings.py
+```python
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', #Tambahkan tepat di bawah SecurityMiddleware
+    ...
+]
+```
+```python
+STATIC_URL = '/static/'
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static' # merujuk ke /static root project pada mode development
+    ]
+else:
+    STATIC_ROOT = BASE_DIR / 'static' # merujuk ke /static root project pada mode production
+```
+
+Lalu, pada direktori root static/css dalam global.css saya menambahkan
+
+```css
+.form-style form input, form textarea, form select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid #bcbcbc;
+    border-radius: 0.375rem;
+}
+.form-style form input:focus, form textarea:focus, form select:focus {
+    outline: none;
+    border-color: #674ea7;
+    box-shadow: 0 0 0 3px #674ea7;
+}
+@keyframes shine {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.animate-shine {
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.3));
+    background-size: 200% 100%;
+    animation: shine 3s infinite;
+}
+```
+Dengan mengsetup hal-hal diatas, saya sudah bisa masuk ke step selanjutnya yaitu menambahkan styling pada halaman login, register, dan main. Pada halaman main, saya menambahkan juga card (card_info.html dan card_product.html) agar halaman lebih menarik. Dan pada langkah terakhir, saya menambahkan navbar dengan responsive design dan mengincludenya pada main.html, create_product.html, dan edit_product.html.
+
+```html
+{% include 'navbar.html' %}
+```
+
+Dan tara~ web sudah ter-styling dan bisa melalukan logic edit dan hapus.
+
+
+
+
+
+
+
+
 
