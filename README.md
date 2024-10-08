@@ -12,6 +12,7 @@ Link : http://muhammad-zaid31-pec.pbp.cs.ui.ac.id/
 - [TUGAS 3](#tugas-3)
 - [TUGAS 4](#tugas-4)
 - [TUGAS 5](#tugas-5)
+- [TUGAS 6](#tugas-6)
 
 # TUGAS 2
 
@@ -618,10 +619,294 @@ Dengan mengsetup hal-hal diatas, saya sudah bisa masuk ke step selanjutnya yaitu
 Dan tara~ web sudah ter-styling dan bisa melalukan logic edit dan hapus.
 
 
+# TUGAS 6
+
+## Jelaskan manfaat dari penggunaan JavaScript dalam pengembangan aplikasi web!
+
+Penggunaan JavaScript sangat bermanfaat dalam pengembangan aplikasi web karena memungkinkan kita membuat halaman yang dinamis dan interaktif, yang mana hal ini dapat meningkatkan user experience nantinya. Dengan JavaScript ini, kita dapat melakukan perubahan konten tanpa perlu memuat ulang halaman menggunakan teknik seperti AJAX, yang mempercepat respons aplikasi. Selain itu, JavaScript mendukung validasi form di sisi klien, manipulasi elemen HTML dan CSS secara real-time, dan memungkinkan pengembangan fitur interaktif seperti animasi, dropdown, dan slider. JavaScript juga dapat digunakan di server-side dengan Node.js, menjadikannya bahasa full-stack yang sangat fleksibel dan efisien dalam pengembangan aplikasi web modern.
+
+## Jelaskan fungsi dari penggunaan await ketika kita menggunakan fetch()! Apa yang akan terjadi jika kita tidak menggunakan await?
+
+Penggunaan await saat menggunakan fetch() berfungsi untuk menunggu hasil dari operasi asinkron sebelum melanjutkan eksekusi kode, sehingga hasilnya bisa langsung digunakan. Tanpa await, fetch() hanya mengembalikan Promise yang belum selesai, dan program akan melanjutkan eksekusi tanpa menunggu data diambil, menyebabkan potensi error saat mencoba mengakses hasil yang belum tersedia. Dengan await, kode jadi lebih mudah dibaca dan dikelola karena kita bisa menulis logika yang terlihat sinkron meskipun berjalan secara asinkron.
+
+
+## Mengapa kita perlu menggunakan decorator csrf_exempt pada view yang akan digunakan untuk AJAX POST?
+
+Decorator csrf_exempt digunakan pada view AJAX POST untuk menghindari pengecekan CSRF token yang biasanya diwajibkan oleh Django untuk keamanan. Django secara default memeriksa token CSRF pada setiap permintaan POST untuk mencegah serangan CSRF, tetapi dalam permintaan AJAX, token ini mungkin tidak terkirim. Dengan csrf_exempt, kita dapat "memberitahu" Django agar tidak akan memeriksa token CSRF sehingga permintaan POST dapat langsung diproses. Meskipun memudahkan pengembangan, penggunaan csrf_exempt harus dilakukan dengan hati-hati karena dapat meningkatkan risiko keamanan jika view tersebut tidak dilindungi dengan baik.
+
+##  Pada tutorial PBP minggu ini, pembersihan data input pengguna dilakukan di belakang (backend) juga. Mengapa hal tersebut tidak dilakukan di frontend saja?
+
+Pembersihan data di backend itu penting karena frontend bisa dimodifikasi oleh pengguna, misalnya dengan mematikan JavaScript atau mengakali validasi yang sudah kita pasang di browser. Jadi, kalau hanya mengandalkan validasi di frontend, data berbahaya seperti script atau input yang tidak sesuai tetap bisa masuk ke server. Backend memastikan data tetap aman dan sesuai aturan meskipun ada yang mencoba manipulasi.
+
+Selain itu, backend merupakan pertahanan terakhir yang bisa kita kontrol sepenuhnya. Di sini, kita bisa memeriksa ulang dan membersihkan semua data sebelum disimpan di sistem atau database. Dengan begitu, kita bisa mencegah serangan seperti XSS atau SQL Injection dan menjaga agar data yang masuk tetap konsisten dan valid, terlepas dari apa yang terjadi di frontend.
 
 
 
+## Implementasi Tugas 6
+1. Pertama-tama kita perlu menyiapkan logic untuk menambahkan product dengan AJAX sehingga kita perlu mengimport beberapa hal berikut pada views.py.
+```python
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+```
+```python
+@csrf_exempt
+@require_POST
+def add_product_ajax(request):
+    name = strip_tags(request.POST.get("name"))
+    price = request.POST.get("price")
+    description = strip_tags(request.POST.get("description"))
+    user = request.user
+
+    new_product = Product(
+        name=name, price=price,
+        description=description,
+        user=user
+    )
+    new_product.save()
+
+    return HttpResponse(b"CREATED", status=201)
+```
+Lalu, jangan lupa melakukan routing untuk fungsi AJAX ini
+```python
+path('create-product-ajax', add_product_ajax, name='add_product_ajax'),
+```
+
+2. Mengubah pengambilan data dengan cara menampilkan melalui Fetch() API. Hal ini bisa dilakukan dengan menghapus bagian filter dibawah ini pada fungsi show_main kita.
+```python
+Product.objects.filter(user=request.user)
+
+'list_product' : products,
+```
+
+dan kita perlu menambahkan data yang sudah terfilter pada show_json dan show_xml, karena kita akan menggunakan kedua fungsi ini untuk pengambilan data.
+```python
+    data = Product.objects.filter(user=request.user)
+```
+
+Setelah hal tersebut, kita perlu menghapus block code berikut pada main.html kita dan menggantinya dengan product_cards
+```html
+    <{% if not list_product %}
+    <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
+        <img src="{% static 'image/missing.png' %}" alt="missing" class="w-32 h-32 mb-4"/>
+        <p class="text-center text-gray-600 mt-4">Belum ada product pada PEC.</p>
+    </div>
+    {% else %}
+    <div class="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 w-full">
+        {% for product in list_product %}
+            {% include 'card_product.html' with product=product %}
+        {% endfor %}
+    </div>
+    {% endif %}
+```
+
+Penggantinya adalah menambahkan blok berikut,
+```html
+    <div id="product_cards"></div>
+```
+
+Pada halaman main.html, sebelum endblock, kita perlu juga menambahkan script untuk mengurus perihal data product kita, berikut hal-hal yang saya tambahkan pada main html.
+
+```html
+<script>
+    async function getProducts(){
+        return fetch("{% url 'main:show_json' %}").then((res) => res.json())
+    }
+
+    async function refreshProducts() {
+    document.getElementById("product_cards").innerHTML = "";
+    document.getElementById("product_cards").className = "";
+    const products = await getProducts();
+    let htmlString = "";
+    let classNameString = "";
+
+    if (products.length === 0) {
+        classNameString = "flex flex-col items-center justify-center min-h-[24rem] p-6";
+        htmlString = `
+            <div class="flex flex-col items-center justify-center min-h-[24rem] p-6">
+                <img src="{% static 'image/missing.png' %}" alt="Sad face" class="w-32 h-32 mb-4"/>
+                <p class="text-center text-gray-600 mt-4">Belum ada data product pada Pacil Electronic Center.</p>
+            </div>
+        `;
+    }
+    else {
+        classNameString = "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 w-full"
+        products.forEach((item) => {
+            const product = DOMPurify.sanitize(item.fields.name);
+            const description = DOMPurify.sanitize(item.fields.description);
+            let tambahanInfo = item.fields.price > 5000000 ? 
+                `<span class="text-red-500 bg-red-200 py-1 px-3 rounded-full font-semibold">Mahal</span>` : 
+                `<span class="text-green-500 bg-green-200 py-1 px-3 rounded-full font-semibold">Murah</span>`;
+
+            htmlString += `
+            <div class="relative bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition-all duration-500 ease-in-out transform hover:scale-105">
+                <!-- Nama Product -->
+                <div class="bg-indigo-500 p-6 text-white">
+                    <h3 class="text-2xl font-bold">${product}</h3>
+                </div>
+
+                <!-- Product Info -->
+                <div class="p-6 space-y-4">
+                    <!-- Price -->
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-lg font-semibold text-gray-600">Harga</p>
+                            <p class="text-2xl font-bold text-green-500">Rp ${item.fields.price}</p>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <p class="text-lg font-semibold text-gray-600">Deskripsi</p>
+                        <p class="text-gray-700">${description}</p>
+                    </div>
 
 
+                    <!-- Info Tambahan :  "Mahal" or "Murah" -->
+                    <div>
+                        <p class="text-gray-700 font-semibold mb-2">Info Tambahan</p>
+                        <div class="flex items-center">
+                            ${tambahanInfo}
+                        </div>
+                    </div>
 
+                    <!--  Edit dan Delete -->
+                    <div class="flex justify-end space-x-2">
+                        <a href="/edit-product/${item.pk}" class="flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded transition-all duration-300 transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                            Edit
+                        </a>
+                        <a href="/delete/${item.pk}" class="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded transition-all duration-300 transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            Hapus
+                        </a>
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+    }
+    document.getElementById("product_cards").className = classNameString;
+    document.getElementById("product_cards").innerHTML = htmlString;
+}
+    refreshProducts();
+...
 
+```
+
+3. Langkah ketiga, kita membuat modal sebagai form untuk menambahkan product nantinya. Dibawah id=product_cards, tambahkan potongan kode berikut,
+
+```html
+    <div id="product_cards"></div>
+
+    <div id="crudModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
+      <div id="crudModalContent" class="relative bg-white rounded-lg shadow-lg w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 mx-4 sm:mx-0 transform scale-95 opacity-0 transition-transform transition-opacity duration-300 ease-out">
+        <!-- Modal header -->
+        <div class="flex items-center justify-between p-4 border-b rounded-t">
+          <h3 class="text-xl font-semibold text-gray-900">
+            Add Product
+          </h3>
+          <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeModalBtn">
+            <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="px-6 py-4 space-y-6 form-style">
+          <form id="productForm">
+            <div class="mb-4">
+              <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+              <input type="text" id="name" name="name" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Enter Name Product" required>
+            </div>
+            <div class="mb-4">
+              <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+              <textarea id="description" name="description" rows="3" class="mt-1 block w-full h-52 resize-none border border-gray-300 rounded-md p-2 hover:border-indigo-700" placeholder="Keterangan product" required></textarea>
+            </div>
+            <div class="mb-4">
+              <label for="price" class="block text-sm font-medium text-gray-700">Harga</label>
+              <input type="number" id="price" name="price" min="0" class="mt-1 block w-full border border-gray-300 rounded-md p-2 hover:border-indigo-700" required>
+            </div>
+          </form>
+        </div>
+        <!-- Modal footer -->
+        <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 p-6 border-t border-gray-200 rounded-b justify-center md:justify-end">
+          <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="cancelButton">Cancel</button>
+          <button type="submit" id="submitProduct" form="productForm" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg">Save</button>
+        </div>
+      </div>
+    </div>
+```
+
+dan pada script yang telah dibuat, tambahkan kode berikut,
+```java
+    const modal = document.getElementById('crudModal');
+    const modalContent = document.getElementById('crudModalContent');
+
+    function showModal() {
+        const modal = document.getElementById('crudModal');
+        const modalContent = document.getElementById('crudModalContent');
+
+        modal.classList.remove('hidden'); 
+        setTimeout(() => {
+          modalContent.classList.remove('opacity-0', 'scale-95');
+          modalContent.classList.add('opacity-100', 'scale-100');
+        }, 50); 
+    }
+
+    function hideModal() {
+        const modal = document.getElementById('crudModal');
+        const modalContent = document.getElementById('crudModalContent');
+
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        modalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+          modal.classList.add('hidden');
+        }, 150); 
+    }
+
+    document.getElementById("cancelButton").addEventListener("click", hideModal);
+    document.getElementById("closeModalBtn").addEventListener("click", hideModal);
+```
+
+Dan langkah terakhir tambahkan tombol untuk menambahkan product dengan AJAX
+```html
+  <!-- Add New Product Button -->
+  <button data-modal-target="crudModal" data-modal-toggle="crudModal" class="btn bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105" onclick="showModal();">
+    Add New product by AJAX
+  </button>
+</div>
+```
+
+4. Setelah hal tersebut, kita perlu menambahkan Data product dengan AJAX pada script kita. Hal tersebut dilakukan dengan menambahkan potongan kode berikut pada script di main.html.
+
+```java
+<script>
+  function addProduct() {
+    fetch("{% url 'main:add_product_ajax' %}", {
+      method: "POST",
+      body: new FormData(document.querySelector('#productForm')),
+    })
+    .then(response => refreshProducts())
+
+    document.getElementById("productForm").reset(); 
+    document.querySelector("[data-modal-toggle='crudModal']").click();
+
+    return false;
+  }
+
+  document.getElementById("productForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    addProduct();
+  })
+
+```
+
+5. Terakhir setelah penambahan AJAX, jangan lupa memastikan keamanan pada Add product kita agar terhindar dari serangan siber.
+
+Dengan menerapkan langkah-langkah diatas kita berhasil menambahkan Add Product dengan AJAX, hore~.
